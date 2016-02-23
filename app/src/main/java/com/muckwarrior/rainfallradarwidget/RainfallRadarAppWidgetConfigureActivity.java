@@ -5,9 +5,12 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 /**
  * The configuration screen for the {@link RainfallRadarAppWidget RainfallRadarAppWidget} AppWidget.
@@ -18,6 +21,7 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
     private static final String PREF_PREFIX_KEY = "appwidget_";
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     EditText mAppWidgetText;
+    ImageView mImageView;
     View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = RainfallRadarAppWidgetConfigureActivity.this;
@@ -94,6 +98,9 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
         }
 
         mAppWidgetText.setText(loadTitlePref(RainfallRadarAppWidgetConfigureActivity.this, mAppWidgetId));
+
+        mImageView = (ImageView) findViewById(R.id.imageView);
+        mImageView.setImageURI(Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/whatever.png"));
     }
 }
 

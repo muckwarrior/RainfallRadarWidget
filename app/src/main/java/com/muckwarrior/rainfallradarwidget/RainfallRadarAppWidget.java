@@ -2,13 +2,17 @@ package com.muckwarrior.rainfallradarwidget;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.widget.RemoteViews;
+
+import com.muckwarrior.rainfallradarwidget.services.UpdateRadarService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,7 +33,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
         views.setTextViewText(R.id.appwidget_text, widgetText);
-
+        //views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/whatever.png"));
 
 
         // Instruct the widget manager to update the widget
@@ -41,12 +45,24 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         Log.d(this, "onUpdate");
 
         // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds) {
+        /*for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
 
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
             new DownloadBitmap(views, appWidgetId, appWidgetManager).execute("MyTestString");
-        }
+        }*/
+
+        ComponentName thisWidget = new ComponentName(context,
+                RainfallRadarAppWidget.class);
+        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        // Build the intent to call the service
+        Intent intent = new Intent(context.getApplicationContext(),
+                UpdateRadarService.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+
+        // Update the widgets via the service
+        context.startService(intent);
     }
 
     @Override
@@ -72,7 +88,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         /**
          * The url from where to download the image.
          */
-        private String url = "http://dreamatico.com/data_images/car/car-6.jpg";
+        private String url = "http://www.met.ie/weathermaps/radar2/WEB_radar4_201602142315.png";
 
         private RemoteViews views;
         private int WidgetID;
@@ -114,7 +130,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
             try {
                 FileOutputStream out = new FileOutputStream(dest);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                 out.flush();
                 out.close();
             } catch (Exception e) {
@@ -122,7 +138,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
             }
 
             Log.d(this, "Setting image bitmap. PostExecute" + bitmap.getByteCount());
-            views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/whatever"));
+            views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/whatever.png"));
             WidgetManager.updateAppWidget(WidgetID, views);
         }
     }

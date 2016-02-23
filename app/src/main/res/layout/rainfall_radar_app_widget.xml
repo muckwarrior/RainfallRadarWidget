@@ -17,12 +17,13 @@
         android:textSize="24sp"
         android:textStyle="bold|italic"/>
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/imageViewMap"
 
         android:layout_below="@+id/appwidget_text"
-        android:layout_centerHorizontal="true" android:src="@android:drawable/presence_video_busy"/>
+        android:layout_centerHorizontal="true" android:src="@drawable/me"
+        android:scaleType="centerCrop"/>
 
 
 </RelativeLayout>
