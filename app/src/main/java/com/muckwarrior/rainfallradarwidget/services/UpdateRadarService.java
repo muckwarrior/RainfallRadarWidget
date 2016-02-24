@@ -13,12 +13,19 @@ import android.widget.RemoteViews;
 
 import com.muckwarrior.rainfallradarwidget.Log;
 import com.muckwarrior.rainfallradarwidget.R;
+import com.muckwarrior.rainfallradarwidget.api.MetClient;
+import com.muckwarrior.rainfallradarwidget.api.ServiceGenerator;
+import com.muckwarrior.rainfallradarwidget.models.Radar;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-public class UpdateRadarService extends Service {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class UpdateRadarService extends Service implements Callback<Radar> {
 
     private AppWidgetManager mAppWidgetManager;
     private int[] mAllWidgetIds;
@@ -36,6 +43,8 @@ public class UpdateRadarService extends Service {
         RemoteViews views = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.rainfall_radar_app_widget);
 
         new DownloadBitmap(views, mAllWidgetIds, mAppWidgetManager).execute("gjhgjhg");
+
+        ServiceGenerator.createService(MetClient.class);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -109,5 +118,15 @@ public class UpdateRadarService extends Service {
             views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/whatever.png"));
             widgetManager.updateAppWidget(widgetIds, views);
         }
+    }
+
+    @Override
+    public void onResponse(Call<Radar> call, Response<Radar> response) {
+        Log.d(this, "onResponse");
+    }
+
+    @Override
+    public void onFailure(Call<Radar> call, Throwable t) {
+        Log.e(this, "onFailure", t);
     }
 }
