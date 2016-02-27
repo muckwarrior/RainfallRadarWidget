@@ -1,5 +1,7 @@
 package com.muckwarrior.rainfallradarwidget.models;
 
+import org.simpleframework.xml.ElementList;
+
 import java.util.List;
 
 /**
@@ -7,9 +9,10 @@ import java.util.List;
  */
 public class Radar {
 
-    List<Image> mImages;
+    @ElementList(inline=true)
+    private final List<Image> mImages;
 
-    public Radar(List<Image> images) {
+    public Radar(@ElementList(name="image") List<Image> images) {
         mImages = images;
     }
 

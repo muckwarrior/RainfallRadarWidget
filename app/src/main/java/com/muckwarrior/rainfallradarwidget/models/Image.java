@@ -1,16 +1,25 @@
 package com.muckwarrior.rainfallradarwidget.models;
 
+import org.simpleframework.xml.Attribute;
+
 /**
  * Created by aaronsmith on 24/02/2016.
  */
 public class Image {
 
+    @Attribute(required = true)
     private final int day;
+
+    @Attribute(required = true)
     private final int hour;
+
+    @Attribute(required = true)
     private final int min;
+
+    @Attribute(required = true)
     private final String src;
 
-    public Image(int day, int hour, int min, String src) {
+    public Image(@Attribute(name="day") int day, @Attribute(name="hour") int hour, @Attribute(name="min") int min, @Attribute(name="src") String src) {
         this.day = day;
         this.hour = hour;
         this.min = min;

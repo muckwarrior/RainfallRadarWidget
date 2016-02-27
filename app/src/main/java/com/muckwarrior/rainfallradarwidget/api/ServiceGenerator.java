@@ -1,6 +1,7 @@
 package com.muckwarrior.rainfallradarwidget.api;
 
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
@@ -11,7 +12,10 @@ public class ServiceGenerator {
 
     public static final String API_BASE_URL = "http://www.met.ie";
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    private static HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+
+
+    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder().addInterceptor(interceptor);
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()

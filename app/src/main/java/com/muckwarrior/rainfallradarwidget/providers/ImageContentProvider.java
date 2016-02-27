@@ -63,9 +63,10 @@ public class ImageContentProvider extends ContentProvider{
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
 
-        Log.d(this, "openFile");
+        Log.d(this, "openFile:" + uri.getLastPathSegment());
 
-        return ParcelFileDescriptor.open(new File(Environment.getExternalStorageDirectory().getAbsoluteFile(), "map.png"), ParcelFileDescriptor.MODE_READ_ONLY);
+        return ParcelFileDescriptor.open(new File(Environment.getExternalStorageDirectory().getAbsoluteFile(),
+                uri.getLastPathSegment()), ParcelFileDescriptor.MODE_READ_ONLY);
 
     }
 }
