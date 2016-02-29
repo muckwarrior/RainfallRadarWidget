@@ -174,11 +174,15 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
 
                     String filename = image.getSrc();
                     File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
-                    File dest = new File(sd, filename);
+                    File dest = new File(sd, "radar/");
+                    if (!dest.exists()) {
+                        dest.mkdirs();
+                    }
+                    File file = new File(dest, filename);
 
                     try {
                         Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                        FileOutputStream out = new FileOutputStream(dest);
+                        FileOutputStream out = new FileOutputStream(file);
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                         out.flush();
                         out.close();

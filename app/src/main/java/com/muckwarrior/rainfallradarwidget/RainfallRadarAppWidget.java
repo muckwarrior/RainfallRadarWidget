@@ -17,6 +17,7 @@ import com.muckwarrior.rainfallradarwidget.services.UpdateRadarService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Implementation of App Widget functionality.
@@ -33,8 +34,21 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
         views.setTextViewText(R.id.appwidget_text, widgetText);
-        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/WEB_radar4_201602272045.png"));
 
+
+        File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
+        File dest = new File(sd, "radar/");
+        File[] file = dest.listFiles();
+
+
+        Arrays.sort(file);
+        Log.d("Files", "Sorted Size: "+ file.length);
+        for (int i=0; i < file.length; i++)
+        {
+            Log.d("Files", "FileName:" + file[i].getName());
+        }
+
+        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + file[file.length -1].getName()));
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);

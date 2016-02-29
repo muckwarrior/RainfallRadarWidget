@@ -65,7 +65,8 @@ public class ImageContentProvider extends ContentProvider{
 
         Log.d(this, "openFile:" + uri.getLastPathSegment());
 
-        return ParcelFileDescriptor.open(new File(Environment.getExternalStorageDirectory().getAbsoluteFile(),
+        File dir = new File(Environment.getExternalStorageDirectory().getAbsoluteFile(), "/radar");
+        return ParcelFileDescriptor.open(new File(dir,
                 uri.getLastPathSegment()), ParcelFileDescriptor.MODE_READ_ONLY);
 
     }
