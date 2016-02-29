@@ -33,7 +33,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         CharSequence widgetText = RainfallRadarAppWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
-        views.setTextViewText(R.id.appwidget_text, widgetText);
+
 
 
         File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
@@ -48,7 +48,16 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
             Log.d("Files", "FileName:" + file[i].getName());
         }
 
-        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + file[file.length -1].getName()));
+        String fileName = file[file.length -1].getName();
+        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
+
+        String time = fileName.substring(0, fileName.lastIndexOf("."));
+        time = time.substring(time.length() -4, time.length());
+        StringBuilder stringBuilder = new StringBuilder(time);
+        stringBuilder.insert(2, ':');
+
+        views.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
+
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
