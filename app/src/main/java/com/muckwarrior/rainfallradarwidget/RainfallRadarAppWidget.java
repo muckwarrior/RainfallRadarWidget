@@ -45,7 +45,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         Log.d("Files", "Sorted Size: "+ file.length);
         for (int i=0; i < file.length; i++)
         {
-            Log.d("Files", "FileName:" + file[i].getName());
+            Log.v("Files", "FileName:" + file[i].getName());
         }
 
         String fileName = file[file.length -1].getName();

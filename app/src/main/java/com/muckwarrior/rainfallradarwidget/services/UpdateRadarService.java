@@ -88,8 +88,20 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
 
     private void saveImages(Radar radar) {
 
+        count = 0;
         final int imageCount = radar.getImages().size();
 
+        File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
+        final File dest = new File(sd, "radar/");
+
+        if (!dest.exists()) {
+            dest.mkdirs();
+        }
+
+        //delete any old files
+        for (File f: dest.listFiles()) {
+            f.delete();
+        }
 
         for (final Image image: radar.getImages()) {
             Log.v(this, "Downloading image:" + "http://www.met.ie/weathermaps/radar2/" + image.getSrc());
@@ -115,11 +127,8 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
                     Log.v(this, "Image onResponse");
 
                     String filename = image.getSrc();
-                    File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
-                    File dest = new File(sd, "radar/");
-                    if (!dest.exists()) {
-                        dest.mkdirs();
-                    }
+
+
                     File file = new File(dest, filename);
 
                     try {
