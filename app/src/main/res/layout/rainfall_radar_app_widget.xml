@@ -24,6 +24,12 @@
         android:layout_below="@+id/appwidget_text"
         android:layout_centerHorizontal="true" android:src="@drawable/me"
         />
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageButton" android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" android:src="@drawable/ic_update_black_24dp"
+        android:layout_margin="8dp"/>
 
 
 </RelativeLayout>
