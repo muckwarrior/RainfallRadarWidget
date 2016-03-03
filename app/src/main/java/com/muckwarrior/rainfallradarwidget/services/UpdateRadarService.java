@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -146,20 +147,39 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
                     Log.v(this, "Count:" + count + " Imagecount:" + imageCount);
                     if (count == imageCount) {
                         Log.d(this, "Updating widgets. Src:" + image.getSrc());
-                        mViews.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + image.getSrc()));
-
-                        String time = image.getSrc().substring(0, image.getSrc().lastIndexOf("."));
-                        time = time.substring(time.length() -4, time.length());
-                        StringBuilder stringBuilder = new StringBuilder(time);
-                        stringBuilder.insert(2, ':');
-
-                        mViews.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
-
-
-                        mAppWidgetManager.updateAppWidget(mAllWidgetIds, mViews);
+                        showLastImage();
                     }
                 }
             });
         }
+
+
+    }
+
+    private void showLastImage() {
+        File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
+        File dest = new File(sd, "radar/");
+        File[] file = dest.listFiles();
+
+
+        Arrays.sort(file);
+        Log.d("Files", "Sorted Size: "+ file.length);
+        for (int i=0; i < file.length; i++)
+        {
+            Log.v("Files", "FileName:" + file[i].getName());
+        }
+
+        String fileName = file[file.length -1].getName();
+        mViews.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
+
+        String time = fileName.substring(0, fileName.lastIndexOf("."));
+        time = time.substring(time.length() -4, time.length());
+        StringBuilder stringBuilder = new StringBuilder(time);
+        stringBuilder.insert(2, ':');
+
+        mViews.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
+
+        stopSelf();
+
     }
 }
