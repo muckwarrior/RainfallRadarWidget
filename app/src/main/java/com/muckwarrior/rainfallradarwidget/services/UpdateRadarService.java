@@ -147,6 +147,15 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
                     if (count == imageCount) {
                         Log.d(this, "Updating widgets. Src:" + image.getSrc());
                         mViews.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + image.getSrc()));
+
+                        String time = image.getSrc().substring(0, image.getSrc().lastIndexOf("."));
+                        time = time.substring(time.length() -4, time.length());
+                        StringBuilder stringBuilder = new StringBuilder(time);
+                        stringBuilder.insert(2, ':');
+
+                        mViews.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
+
+
                         mAppWidgetManager.updateAppWidget(mAllWidgetIds, mViews);
                     }
                 }
