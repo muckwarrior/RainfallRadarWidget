@@ -32,7 +32,7 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            RainfallRadarAppWidget.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+            //RainfallRadarAppWidget.updateAppWidget(context, appWidgetManager, mAppWidgetId);
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
@@ -99,8 +99,6 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
 
         mAppWidgetText.setText(loadTitlePref(RainfallRadarAppWidgetConfigureActivity.this, mAppWidgetId));
 
-        mImageView = (ImageView) findViewById(R.id.imageView);
-        mImageView.setImageURI(Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/whatever.png"));
     }
 }
 

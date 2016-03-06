@@ -1,5 +1,6 @@
 package com.muckwarrior.rainfallradarwidget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -25,69 +26,40 @@ import java.util.Arrays;
  */
 public class RainfallRadarAppWidget extends AppWidgetProvider {
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-
-        Log.d("RainfallRadarAppWidget", "updateAppWidget");
-
-        CharSequence widgetText = RainfallRadarAppWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
-
-
-
-        File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
-        File dest = new File(sd, "radar/");
-        File[] file = dest.listFiles();
-
-
-        Arrays.sort(file);
-        Log.d("Files", "Sorted Size: "+ file.length);
-        for (int i=0; i < file.length; i++)
-        {
-            Log.v("Files", "FileName:" + file[i].getName());
-        }
-
-        String fileName = file[file.length -1].getName();
-        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
-
-        String time = fileName.substring(0, fileName.lastIndexOf("."));
-        time = time.substring(time.length() -4, time.length());
-        StringBuilder stringBuilder = new StringBuilder(time);
-        stringBuilder.insert(2, ':');
-
-        views.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
-
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
-
+    public static final String SYNC_CLICKED    = "rainfallradar.automaticWidgetSyncButtonClick";
+    public static final String SYNC_COMPLETE    = "rainfallradar.automaticWidgetSyncComplete";
 
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Log.d(this, "onUpdate");
 
-        // There may be multiple widgets active, so update all of them
-        /*for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
 
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
-            new DownloadBitmap(views, appWidgetId, appWidgetManager).execute("MyTestString");
-        }*/
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
+        views.setOnClickPendingIntent(R.id.imageButtonRefresh, getPendingSelfIntent(context, SYNC_CLICKED));
 
-        ComponentName thisWidget = new ComponentName(context,
-                RainfallRadarAppWidget.class);
-        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+        appWidgetManager.updateAppWidget(appWidgetIds, views);
 
-        // Build the intent to call the service
-        Intent intent = new Intent(context.getApplicationContext(),
-                UpdateRadarService.class);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+        startSyncService(context, appWidgetManager);
+    }
 
-        // Update the widgets via the service
-        context.startService(intent);
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+
+        Log.d(this, "onReceive " + intent.getAction());
+
+        if (SYNC_CLICKED.equals(intent.getAction())) {
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            startSyncService(context, appWidgetManager);
+        } else  if (SYNC_COMPLETE.equals(intent.getAction())) {
+            // update views
+            int[] widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+
+            showLastImage(context, widgetIds);
+
+        }
     }
 
     @Override
@@ -106,6 +78,60 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+
+
+    private void showLastImage(Context context, int[] widgetIds) {
+        File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
+        File dest = new File(sd, "radar/");
+        File[] file = dest.listFiles();
+
+
+        Arrays.sort(file);
+        Log.d("Files", "Sorted Size: "+ file.length);
+        for (int i=0; i < file.length; i++)
+        {
+            Log.v("Files", "FileName:" + file[i].getName());
+        }
+
+        String fileName = file[file.length -1].getName();
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
+        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
+
+        String time = fileName.substring(0, fileName.lastIndexOf("."));
+        time = time.substring(time.length() -4, time.length());
+        StringBuilder stringBuilder = new StringBuilder(time);
+        stringBuilder.insert(2, ':');
+
+        views.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
+        views.setOnClickPendingIntent(R.id.imageButtonRefresh, getPendingSelfIntent(context, RainfallRadarAppWidget.SYNC_CLICKED));
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+
+        for (int widgetId: widgetIds) {
+            appWidgetManager.updateAppWidget(widgetId, views);
+        }
+
+    }
+
+    private void startSyncService(Context context, AppWidgetManager appWidgetManager) {
+        ComponentName thisWidget = new ComponentName(context,
+                RainfallRadarAppWidget.class);
+        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        // Build the intent to call the service
+        Intent intent = new Intent(context.getApplicationContext(),
+                UpdateRadarService.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+
+        // Update the widgets via the service
+        context.startService(intent);
+    }
+
+    protected PendingIntent getPendingSelfIntent(Context context, String action) {
+        Intent intent = new Intent(context, getClass());
+        intent.setAction(action);
+        return PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 
 

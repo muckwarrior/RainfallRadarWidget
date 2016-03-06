@@ -23,6 +23,8 @@
         <receiver android:name=".RainfallRadarAppWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="rainfallradar.automaticWidgetSyncButtonClick"/>
+                <action android:name="rainfallradar.automaticWidgetSyncComplete"/>
             </intent-filter>
 
             <meta-data

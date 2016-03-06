@@ -1,7 +1,10 @@
 package com.muckwarrior.rainfallradarwidget.services;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
+import android.content.ContentProvider;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +16,7 @@ import android.widget.RemoteViews;
 
 import com.muckwarrior.rainfallradarwidget.Log;
 import com.muckwarrior.rainfallradarwidget.R;
+import com.muckwarrior.rainfallradarwidget.RainfallRadarAppWidget;
 import com.muckwarrior.rainfallradarwidget.api.MetClient;
 import com.muckwarrior.rainfallradarwidget.api.ServiceGenerator;
 import com.muckwarrior.rainfallradarwidget.models.Image;
@@ -32,10 +36,9 @@ import retrofit2.Response;
 
 public class UpdateRadarService extends Service implements Callback<Radar> {
 
-    private AppWidgetManager mAppWidgetManager;
     private int[] mAllWidgetIds;
     private int count = 0;
-    private RemoteViews mViews;
+    private Context mContext;
 
     public UpdateRadarService() {
     }
@@ -43,13 +46,9 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        mAppWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-
         mAllWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
 
-        mViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.rainfall_radar_app_widget);
-
-
+        mContext = this;
 
         Log.d(this, "About to call radar");
         MetClient client = ServiceGenerator.createService(MetClient.class);
@@ -147,39 +146,16 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
                     Log.v(this, "Count:" + count + " Imagecount:" + imageCount);
                     if (count == imageCount) {
                         Log.d(this, "Updating widgets. Src:" + image.getSrc());
-                        showLastImage();
+
+                        Intent i = new Intent(mContext, RainfallRadarAppWidget.class);
+                        i.setAction(RainfallRadarAppWidget.SYNC_COMPLETE);
+                        i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mAllWidgetIds);
+                        mContext.sendBroadcast(i);
+
+                        stopSelf();
                     }
                 }
             });
         }
-
-
-    }
-
-    private void showLastImage() {
-        File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
-        File dest = new File(sd, "radar/");
-        File[] file = dest.listFiles();
-
-
-        Arrays.sort(file);
-        Log.d("Files", "Sorted Size: "+ file.length);
-        for (int i=0; i < file.length; i++)
-        {
-            Log.v("Files", "FileName:" + file[i].getName());
-        }
-
-        String fileName = file[file.length -1].getName();
-        mViews.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
-
-        String time = fileName.substring(0, fileName.lastIndexOf("."));
-        time = time.substring(time.length() -4, time.length());
-        StringBuilder stringBuilder = new StringBuilder(time);
-        stringBuilder.insert(2, ':');
-
-        mViews.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
-
-        stopSelf();
-
     }
 }
