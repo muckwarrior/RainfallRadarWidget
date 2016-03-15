@@ -119,6 +119,13 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
                 @Override
                 public void onFailure(okhttp3.Call call, IOException e) {
                     Log.e(this, "onFailure" + e.getMessage(), e);
+
+                    Intent i = new Intent(mContext, RainfallRadarAppWidget.class);
+                    i.setAction(RainfallRadarAppWidget.SYNC_FAILED);
+                    i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mAllWidgetIds);
+                    mContext.sendBroadcast(i);
+
+                    stopSelf();
                 }
 
                 @Override

@@ -11,8 +11,11 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Vibrator;
+import android.view.View;
 import android.widget.RemoteViews;
 
+import android.widget.Toast;
 import com.muckwarrior.rainfallradarwidget.services.UpdateRadarService;
 
 import java.io.File;
@@ -28,6 +31,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
     public static final String SYNC_CLICKED    = "rainfallradar.automaticWidgetSyncButtonClick";
     public static final String SYNC_COMPLETE    = "rainfallradar.automaticWidgetSyncComplete";
+    public static final String SYNC_FAILED    = "rainfallradar.automaticWidgetSyncFailed";
 
 
     @Override
@@ -37,6 +41,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
         views.setOnClickPendingIntent(R.id.imageButtonRefresh, getPendingSelfIntent(context, SYNC_CLICKED));
+
 
         appWidgetManager.updateAppWidget(appWidgetIds, views);
 
@@ -50,8 +55,23 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
         Log.d(this, "onReceive " + intent.getAction());
 
+
+
         if (SYNC_CLICKED.equals(intent.getAction())) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
+
+            views.setViewVisibility(R.id.imageButtonRefresh, View.INVISIBLE);
+
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), RainfallRadarAppWidget.class.getName());
+            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
+
+
+            for (int widgetId: appWidgetIds) {
+                appWidgetManager.updateAppWidget(widgetId, views);
+            }
+
             startSyncService(context, appWidgetManager);
         } else  if (SYNC_COMPLETE.equals(intent.getAction())) {
             // update views
@@ -59,6 +79,20 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
             showLastImage(context, widgetIds);
 
+        } else if (SYNC_FAILED.equals(intent.getAction())) {
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
+
+            views.setViewVisibility(R.id.imageButtonRefresh, View.VISIBLE);
+
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), RainfallRadarAppWidget.class.getName());
+            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
+
+            Toast.makeText(context, "Sync failed", Toast.LENGTH_SHORT);
+
+            for (int widgetId: appWidgetIds) {
+                appWidgetManager.updateAppWidget(widgetId, views);
+            }
         }
     }
 
@@ -105,6 +139,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
         views.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
         views.setOnClickPendingIntent(R.id.imageButtonRefresh, getPendingSelfIntent(context, RainfallRadarAppWidget.SYNC_CLICKED));
+        views.setViewVisibility(R.id.imageButtonRefresh, View.VISIBLE);
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
