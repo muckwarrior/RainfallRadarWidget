@@ -63,6 +63,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
 
             views.setViewVisibility(R.id.imageButtonRefresh, View.INVISIBLE);
+            views.setViewVisibility(R.id.progressBar, View.VISIBLE);
 
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), RainfallRadarAppWidget.class.getName());
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
@@ -84,6 +85,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
 
             views.setViewVisibility(R.id.imageButtonRefresh, View.VISIBLE);
+            views.setViewVisibility(R.id.progressBar, View.GONE);
 
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), RainfallRadarAppWidget.class.getName());
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
@@ -140,6 +142,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.appwidget_text, stringBuilder.toString());
         views.setOnClickPendingIntent(R.id.imageButtonRefresh, getPendingSelfIntent(context, RainfallRadarAppWidget.SYNC_CLICKED));
         views.setViewVisibility(R.id.imageButtonRefresh, View.VISIBLE);
+        views.setViewVisibility(R.id.progressBar, View.GONE);
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
