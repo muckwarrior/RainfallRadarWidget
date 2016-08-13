@@ -29,6 +29,7 @@ import java.util.Arrays;
  */
 public class RainfallRadarAppWidget extends AppWidgetProvider {
 
+    public static final String ACTION_AUTO_UPDATE = "rainfallradar.AUTO_UPDATE";
     public static final String SYNC_CLICKED    = "rainfallradar.automaticWidgetSyncButtonClick";
     public static final String SYNC_COMPLETE    = "rainfallradar.automaticWidgetSyncComplete";
     public static final String SYNC_FAILED    = "rainfallradar.automaticWidgetSyncFailed";
