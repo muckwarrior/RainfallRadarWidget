@@ -14,7 +14,7 @@ import java.util.Calendar;
 public class AppWidgetAlarm {
 
     private final int ALARM_ID = 0;
-    private final int INTERVAL_MILLIS = 10000;
+    private final int INTERVAL_MILLIS = 900000;
 
     private Context mContext;
 

@@ -58,7 +58,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
 
 
-        if (SYNC_CLICKED.equals(intent.getAction())) {
+        if (SYNC_CLICKED.equals(intent.getAction()) || ACTION_AUTO_UPDATE.equals(intent.getAction())) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
@@ -109,16 +109,30 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
+        Log.d(this, "onEnabled");
         // Enter relevant functionality for when the first widget is created
+
+        // start alarm
+        AppWidgetAlarm appWidgetAlarm = new AppWidgetAlarm(context.getApplicationContext());
+        appWidgetAlarm.startAlarm();
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+
+        // stop alarm
+        AppWidgetAlarm appWidgetAlarm = new AppWidgetAlarm(context.getApplicationContext());
+        appWidgetAlarm.stopAlarm();
     }
 
 
     private void showLastImage(Context context, int[] widgetIds) {
+
+        if (widgetIds == null) {
+            return;
+        }
+
         File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
         File dest = new File(sd, "radar/");
         File[] file = dest.listFiles();
@@ -154,6 +168,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
     }
 
     private void startSyncService(Context context, AppWidgetManager appWidgetManager) {
+        Log.d(this, "startSyncService context:" + context);
         ComponentName thisWidget = new ComponentName(context,
                 RainfallRadarAppWidget.class);
         int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);

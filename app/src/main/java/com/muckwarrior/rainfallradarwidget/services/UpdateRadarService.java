@@ -46,6 +46,9 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        if (intent == null) {
+            Log.d(this, "Oh noes, intent is null");
+        }
         mAllWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
 
         mContext = this;
@@ -99,8 +102,10 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
         }
 
         //delete any old files
-        for (File f: dest.listFiles()) {
-            f.delete();
+        if (dest.listFiles() != null) {
+            for (File f : dest.listFiles()) {
+                f.delete();
+            }
         }
 
         for (final Image image: radar.getImages()) {

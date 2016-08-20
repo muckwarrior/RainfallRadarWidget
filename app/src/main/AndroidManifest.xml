@@ -21,6 +21,7 @@
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="rainfallradar.automaticWidgetSyncButtonClick"/>
                 <action android:name="rainfallradar.automaticWidgetSyncComplete"/>
+                <action android:name="rainfallradar.AUTO_UPDATE" />
             </intent-filter>
 
             <meta-data
