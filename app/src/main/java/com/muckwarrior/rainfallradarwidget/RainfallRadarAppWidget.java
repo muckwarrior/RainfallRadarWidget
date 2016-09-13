@@ -6,12 +6,8 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
-import android.os.Vibrator;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -19,8 +15,6 @@ import android.widget.Toast;
 import com.muckwarrior.rainfallradarwidget.services.UpdateRadarService;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -103,7 +97,6 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
     public void onDeleted(Context context, int[] appWidgetIds) {
         // When the user deletes the widget, delete the preference associated with it.
         for (int appWidgetId : appWidgetIds) {
-            RainfallRadarAppWidgetConfigureActivity.deleteTitlePref(context, appWidgetId);
         }
     }
 
@@ -114,7 +107,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
         // start alarm
         AppWidgetAlarm appWidgetAlarm = new AppWidgetAlarm(context.getApplicationContext());
-        appWidgetAlarm.startAlarm();
+        appWidgetAlarm.startAlarm(RainfallRadarAppWidgetConfigureActivity.loadIntervalPref(context));
     }
 
     @Override

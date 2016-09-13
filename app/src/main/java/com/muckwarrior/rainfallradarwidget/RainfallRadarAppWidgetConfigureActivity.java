@@ -13,6 +13,7 @@ import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -25,6 +26,9 @@ import java.util.List;
  */
 public class RainfallRadarAppWidgetConfigureActivity extends Activity {
 
+    private static final String[] INTERVAL_NAMES = {"Manual", "15 min", "30 min", "Hourly"};
+    private static final int[] INTERVAL_VALUES = {0, 900000, 1800000, 3600000};
+
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -32,15 +36,19 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
     private static final String PREFS_NAME = "com.muckwarrior.rainfallradarwidget.RainfallRadarAppWidget";
-    private static final String PREF_PREFIX_KEY = "appwidget_";
+    private static final String PREF_PREFIX_INTERVAL_KEY = "interval_appwidget_";
+    private static final String PREF_PREFIX_WIFI_KEY = "wifi_appwidget_";
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    Spinner mSpinnerUpdateFrequency;
+    private Spinner mSpinnerUpdateFrequency;
+    private CheckBox mChkWifiOnly;
+
     View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = RainfallRadarAppWidgetConfigureActivity.this;
 
             // When the button is clicked, store the string locally
-            //saveTitlePref(context, mAppWidgetId, widgetText);
+            saveIntervalPref(context, mAppWidgetId, INTERVAL_VALUES[mSpinnerUpdateFrequency.getSelectedItemPosition()]);
+            saveWifiPref(context, mChkWifiOnly.isChecked());
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -59,27 +67,41 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
     }
 
     // Write the prefix to the SharedPreferences object for this widget
-    static void saveTitlePref(Context context, int appWidgetId, String text) {
+    static void saveIntervalPref(Context context, int appWidgetId, int interval) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
+        prefs.putInt(PREF_PREFIX_INTERVAL_KEY, interval);
         prefs.apply();
     }
 
     // Read the prefix from the SharedPreferences object for this widget.
     // If there is no preference saved, get the default from a resource
-    static String loadTitlePref(Context context, int appWidgetId) {
+    static int loadIntervalPref(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
-        if (titleValue != null) {
-            return titleValue;
-        } else {
-            return context.getString(R.string.appwidget_text);
-        }
+        return prefs.getInt(PREF_PREFIX_INTERVAL_KEY, 0);
     }
 
-    static void deleteTitlePref(Context context, int appWidgetId) {
+    static void deleteIntervalPref(Context context) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.remove(PREF_PREFIX_KEY + appWidgetId);
+        prefs.remove(PREF_PREFIX_INTERVAL_KEY);
+        prefs.apply();
+    }
+
+    static void saveWifiPref(Context context, boolean wifiOnly) {
+        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
+        prefs.putBoolean(PREF_PREFIX_WIFI_KEY, wifiOnly);
+        prefs.apply();
+    }
+
+    // Read the prefix from the SharedPreferences object for this widget.
+    // If there is no preference saved, get the default from a resource
+    static boolean loadWifiPref(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+        return prefs.getBoolean(PREF_PREFIX_WIFI_KEY, true);
+    }
+
+    static void deleteWifiPref(Context context) {
+        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
+        prefs.remove(PREF_PREFIX_WIFI_KEY);
         prefs.apply();
     }
 
@@ -93,20 +115,20 @@ public class RainfallRadarAppWidgetConfigureActivity extends Activity {
 
         setContentView(R.layout.rainfall_radar_app_widget_configure);
 
-        List<Integer> freqList = new ArrayList<>();
-        freqList.add(0);
-        freqList.add(15);
-        freqList.add(30);
-        freqList.add(60);
-        freqList.add(120);
-        freqList.add(180);
+        List<String> freqList = new ArrayList<>();
+        freqList.add(INTERVAL_NAMES[0]);
+        freqList.add(INTERVAL_NAMES[1]);
+        freqList.add(INTERVAL_NAMES[2]);
+        freqList.add(INTERVAL_NAMES[3]);
 
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_spinner_dropdown_item, freqList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, freqList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mSpinnerUpdateFrequency = (Spinner) findViewById(R.id.spinnerUpdateFrequency);
         mSpinnerUpdateFrequency.setAdapter(adapter);
         mSpinnerUpdateFrequency.setSelection(0);
+
+        mChkWifiOnly = (CheckBox) findViewById(R.id.checkBoxWifiOnly);
 
 
         findViewById(R.id.buttonAdd).setOnClickListener(mOnClickListener);

@@ -25,17 +25,17 @@ public class AppWidgetAlarm {
     }
 
 
-    public void startAlarm()
+    public void startAlarm(int interval)
     {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MILLISECOND, INTERVAL_MILLIS);
+        calendar.add(Calendar.MILLISECOND, interval);
 
         Intent alarmIntent = new Intent(RainfallRadarAppWidget.ACTION_AUTO_UPDATE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, ALARM_ID, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         // RTC does not wake the device up
-        alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), INTERVAL_MILLIS, pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), interval, pendingIntent);
     }
 
 
