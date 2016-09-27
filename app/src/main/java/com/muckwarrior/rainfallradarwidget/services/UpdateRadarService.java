@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Date;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -101,73 +102,97 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
             dest.mkdirs();
         }
 
-        //delete any old files
+        //delete any files older than 24h
         if (dest.listFiles() != null) {
             for (File f : dest.listFiles()) {
-                f.delete();
+                long diff = (new Date().getTime() - new Date(f.lastModified()).getTime()) / 60 / 60 / 24;
+                if (diff > 24) {
+                    f.delete();
+                }
             }
         }
-
+        
         for (final Image image: radar.getImages()) {
-            Log.v(this, "Downloading image:" + "http://www.met.ie/weathermaps/radar2/" + image.getSrc());
+            //Keep a count to compare to imageCount so we know when we're finished
+            count++;
 
+            //Check if the file exists. We only download it if it doesn't
+            File currentImage = new File(dest, image.getSrc());
+            if (currentImage.exists()) {
+                Log.v(this, "NOT Downloading image. Already exists locally:" + image.getSrc());
 
-
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url("http://www.met.ie/weathermaps/radar2/" + image.getSrc())
-                    .addHeader("Referer", "http://www.met.ie/latest/rainfall_radar.asp")
-                    .build();
-
-            client.newCall(request).enqueue(new okhttp3.Callback() {
-                @Override
-                public void onFailure(okhttp3.Call call, IOException e) {
-                    Log.e(this, "onFailure" + e.getMessage(), e);
-
-                    Intent i = new Intent(mContext, RainfallRadarAppWidget.class);
-                    i.setAction(RainfallRadarAppWidget.SYNC_FAILED);
-                    i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mAllWidgetIds);
-                    mContext.sendBroadcast(i);
-
-                    stopSelf();
+                if (count == imageCount) {
+                    Log.d(this, "No new images to download");
+                    stopSelfWithSuccess();
                 }
-
-                @Override
-                public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-
-                    Log.v(this, "Image onResponse");
-
-                    String filename = image.getSrc();
+            } else {
+                Log.v(this, "Downloading image:" + "http://www.met.ie/weathermaps/radar2/" + image.getSrc());
 
 
-                    File file = new File(dest, filename);
+                OkHttpClient client = new OkHttpClient();
 
-                    try {
-                        Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                        FileOutputStream out = new FileOutputStream(file);
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                        out.flush();
-                        out.close();
+                Request request = new Request.Builder()
+                        .url("http://www.met.ie/weathermaps/radar2/" + image.getSrc())
+                        .addHeader("Referer", "http://www.met.ie/latest/rainfall_radar.asp")
+                        .build();
 
-                        count++;
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                client.newCall(request).enqueue(new okhttp3.Callback() {
+                    @Override
+                    public void onFailure(okhttp3.Call call, IOException e) {
+                        Log.e(this, "onFailure" + e.getMessage(), e);
+
+                        stopSelfWithFailure();
                     }
 
-                    Log.v(this, "Count:" + count + " Imagecount:" + imageCount);
-                    if (count == imageCount) {
-                        Log.d(this, "Updating widgets. Src:" + image.getSrc());
+                    @Override
+                    public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
 
-                        Intent i = new Intent(mContext, RainfallRadarAppWidget.class);
-                        i.setAction(RainfallRadarAppWidget.SYNC_COMPLETE);
-                        i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mAllWidgetIds);
-                        mContext.sendBroadcast(i);
+                        Log.v(this, "Image onResponse");
 
-                        stopSelf();
+                        String filename = image.getSrc();
+
+
+                        File file = new File(dest, filename);
+
+                        try {
+                            Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            FileOutputStream out = new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                            out.flush();
+                            out.close();
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        Log.v(this, "Count:" + count + " Imagecount:" + imageCount);
+                        if (count == imageCount) {
+                            Log.d(this, "Updating widgets. Src:" + image.getSrc());
+
+                            stopSelfWithSuccess();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
+    }
+
+    private void stopSelfWithSuccess() {
+        Intent i = new Intent(mContext, RainfallRadarAppWidget.class);
+        i.setAction(RainfallRadarAppWidget.SYNC_COMPLETE);
+        i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mAllWidgetIds);
+        mContext.sendBroadcast(i);
+
+        stopSelf();
+    }
+
+    private void stopSelfWithFailure() {
+        Intent i = new Intent(mContext, RainfallRadarAppWidget.class);
+        i.setAction(RainfallRadarAppWidget.SYNC_FAILED);
+        i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mAllWidgetIds);
+        mContext.sendBroadcast(i);
+
+        stopSelf();
     }
 }
