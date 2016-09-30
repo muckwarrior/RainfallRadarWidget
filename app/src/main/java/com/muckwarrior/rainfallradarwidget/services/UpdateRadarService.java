@@ -87,6 +87,7 @@ public class UpdateRadarService extends Service implements Callback<Radar> {
     @Override
     public void onFailure(Call<Radar> call, Throwable t) {
         Log.e(this, "onFailure", t);
+        stopSelfWithFailure();
     }
 
 
