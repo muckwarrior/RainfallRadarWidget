@@ -123,6 +123,7 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
     private void showLastImage(Context context, int[] widgetIds) {
 
         if (widgetIds == null) {
+            Log.w(this, "showLastImage widgetIDs null");
             return;
         }
 
@@ -138,8 +139,13 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
             Log.v("Files", "FileName:" + file[i].getName());
         }
 
-        String fileName = file[file.length -1].getName();
+
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
+
+        //Set previous file name before latest file. This is a hack to get around image caching issue
+        String fileName = file[file.length -1].getName();
+        String prevFileName = file[file.length -2].getName();
+        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + prevFileName));
         views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
 
         String time = fileName.substring(0, fileName.lastIndexOf("."));
