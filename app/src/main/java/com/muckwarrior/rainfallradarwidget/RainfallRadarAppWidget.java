@@ -129,24 +129,29 @@ public class RainfallRadarAppWidget extends AppWidgetProvider {
 
         File sd = Environment.getExternalStorageDirectory().getAbsoluteFile();
         File dest = new File(sd, "radar/");
-        File[] file = dest.listFiles();
+        File[] files = dest.listFiles();
 
+        if (files == null || files.length <= 0) {
+            return;
+        }
 
-        Arrays.sort(file);
-        Log.d("Files", "Sorted Size: "+ file.length);
-        for (int i=0; i < file.length; i++)
+        Arrays.sort(files);
+        Log.d("Files", "Sorted Size: "+ files.length);
+        for (int i=0; i < files.length; i++)
         {
-            Log.v("Files", "FileName:" + file[i].getName());
+            Log.v("Files", "FileName:" + files[i].getName());
         }
 
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rainfall_radar_app_widget);
 
         //Set previous file name before latest file. This is a hack to get around image caching issue
-        String fileName = file[file.length -1].getName();
-        String prevFileName = file[file.length -2].getName();
+        String fileName = files[files.length -1].getName();
+        String prevFileName = files[files.length -2].getName();
         views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + prevFileName));
         views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
+        views.setImageViewUri(R.id.imageViewMap, Uri.parse("content://com.muckwarrior.rainfallradarwidget.map.provider/" + fileName));
+        Log.d(this, "Latest image set to:" + fileName);
 
         String time = fileName.substring(0, fileName.lastIndexOf("."));
         time = time.substring(time.length() -4, time.length());
