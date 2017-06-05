@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "111190444494",
+    "firebase_url": "https://rainfall-radar.firebaseio.com",
+    "project_id": "rainfall-radar",
+    "storage_bucket": "rainfall-radar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111190444494:android:c48b790c136be75e",
+        "android_client_info": {
+          "package_name": "com.muckwarrior.rainfallradarwidget"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111190444494-vk4f733s76ut6i9n7d90troo4a26hago.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.muckwarrior.rainfallradarwidget",
+            "certificate_hash": "14dd2270e6ea232c3d32e244ab8569baa8a6a4b0"
+          }
+        },
+        {
+          "client_id": "111190444494-bkepq4mmkr7e0ltqcve3g17uorun4bet.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgi5Ze7-3fUi6Zf1nzQDgCLKwCerlguqA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111190444494-bkepq4mmkr7e0ltqcve3g17uorun4bet.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
